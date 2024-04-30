@@ -43,39 +43,33 @@
         // Firebase 초기화
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+// 폼 제출 이벤트 핸들러
+bookForm.addEventListener('submit', (e) => {
+    e.preventDefault(); // 폼 제출 방지
 
-        // 책 등록 폼
-        const bookForm = document.getElementById('book-form');
+    // 폼 입력값 가져오기
+    const title = bookForm['title'].value;
+    const author = bookForm['author'].value;
+    const description = bookForm['description'].value;
+    const imageUrl = bookForm['imageUrl'].value;
 
-        // 책 목록 출력할 요소
-        const bookList = document.getElementById('book-list');
+    // Firebase Realtime Database에 데이터 추가
+    const newBookRef = database.ref('books').push();
+    newBookRef.set({
+        title: title,
+        author: author,
+        description: description,
+        imageUrl: imageUrl
+    })
+    .then(() => {
+        console.log('책이 성공적으로 등록되었습니다!');
+        bookForm.reset(); // 폼 초기화
+    })
+    .catch((error) => {
+        console.error('책 등록 중 오류가 발생했습니다:', error);
+    });
+});
 
-        // 폼 제출 이벤트 핸들러
-        bookForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // 폼 제출 방지
-
-            // 폼 입력값 가져오기
-            const title = bookForm['title'].value;
-            const author = bookForm['author'].value;
-            const description = bookForm['description'].value;
-            const imageUrl = bookForm['imageUrl'].value;
-
-            // Firebase Realtime Database에 데이터 추가
-            const newBookRef = database.ref('books').push();
-            newBookRef.set({
-                title: title,
-                author: author,
-                description: description,
-                imageUrl: imageUrl
-            })
-            .then(() => {
-                console.log('책이 성공적으로 등록되었습니다!');
-                bookForm.reset(); // 폼 초기화
-            })
-            .catch((error) => {
-                console.error('책 등록 중 오류가 발생했습니다:', error);
-            });
-        });
 
         // 책 목록 가져오기
         database.ref('books').on('value', (snapshot) => {
