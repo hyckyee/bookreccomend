@@ -4,21 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>책 등록 및 목록</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        form input,
+        form textarea {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        form button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #45a049;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+
+        li {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+
+        li img {
+            max-width: 100px;
+            max-height: 150px;
+            margin-right: 10px;
+            float: left;
+        }
+
+        li h2 {
+            margin-top: 0;
+        }
+    </style>
 </head>
 <body>
     <h1>책 등록</h1>
     <form id="book-form">
         <label for="title">제목:</label>
-        <input type="text" id="title" name="title" required><br><br>
+        <input type="text" id="title" name="title" required>
 
         <label for="author">작가:</label>
-        <input type="text" id="author" name="author" required><br><br>
+        <input type="text" id="author" name="author" required>
 
-        <label for="description">설명:</label><br>
-        <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
+        <label for="description">설명:</label>
+        <textarea id="description" name="description" rows="4" required></textarea>
 
         <label for="imageUrl">이미지 URL:</label>
-        <input type="text" id="imageUrl" name="imageUrl" required><br><br>
+        <input type="text" id="imageUrl" name="imageUrl" required>
 
         <button type="submit">등록</button>
     </form>
@@ -43,33 +118,39 @@
         // Firebase 초기화
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-// 폼 제출 이벤트 핸들러
-bookForm.addEventListener('submit', (e) => {
-    e.preventDefault(); // 폼 제출 방지
 
-    // 폼 입력값 가져오기
-    const title = bookForm['title'].value;
-    const author = bookForm['author'].value;
-    const description = bookForm['description'].value;
-    const imageUrl = bookForm['imageUrl'].value;
+        // 책 등록 폼
+        const bookForm = document.getElementById('book-form');
 
-    // Firebase Realtime Database에 데이터 추가
-    const newBookRef = database.ref('books').push();
-    newBookRef.set({
-        title: title,
-        author: author,
-        description: description,
-        imageUrl: imageUrl
-    })
-    .then(() => {
-        console.log('책이 성공적으로 등록되었습니다!');
-        bookForm.reset(); // 폼 초기화
-    })
-    .catch((error) => {
-        console.error('책 등록 중 오류가 발생했습니다:', error);
-    });
-});
+        // 책 목록 출력할 요소
+        const bookList = document.getElementById('book-list');
 
+        // 폼 제출 이벤트 핸들러
+        bookForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // 폼 제출 방지
+
+            // 폼 입력값 가져오기
+            const title = bookForm['title'].value;
+            const author = bookForm['author'].value;
+            const description = bookForm['description'].value;
+            const imageUrl = bookForm['imageUrl'].value;
+
+            // Firebase Realtime Database에 데이터 추가
+            const newBookRef = database.ref('books').push();
+            newBookRef.set({
+                title: title,
+                author: author,
+                description: description,
+                imageUrl: imageUrl
+            })
+            .then(() => {
+                console.log('책이 성공적으로 등록되었습니다!');
+                bookForm.reset(); // 폼 초기화
+            })
+            .catch((error) => {
+                console.error('책 등록 중 오류가 발생했습니다:', error);
+            });
+        });
 
         // 책 목록 가져오기
         database.ref('books').on('value', (snapshot) => {
@@ -78,10 +159,12 @@ bookForm.addEventListener('submit', (e) => {
                 const bookData = childSnapshot.val();
                 const bookElement = document.createElement('li');
                 bookElement.innerHTML = `
-                    <h2>${bookData.title}</h2>
-                    <p><strong>작가:</strong> ${bookData.author}</p>
-                    <p>${bookData.description}</p>
                     <img src="${bookData.imageUrl}" alt="${bookData.title}">
+                    <div>
+                        <h2>${bookData.title}</h2>
+                        <p><strong>작가:</strong> ${bookData.author}</p>
+                        <p>${bookData.description}</p>
+                    </div>
                 `;
                 bookList.appendChild(bookElement);
             });
